@@ -49,29 +49,35 @@ length(ADHD_WITH_EXECFUNC)
 
 RSAV_unique=unique(RSAV$person_id)
 length(RSAV_unique)
+
 ##############ADHD WITHOUT EXECUTIVE FUNCTIONING###############
 ADHD_NO_EXECFUNC = setdiff(RSAV_unique,ADHD_WITH_EXECFUNC)
 length(ADHD_NO_EXECFUNC)
 
 #######ADHD WITH EXECUTIVE FUNCTIONING COHORT##############
 ###########BASELINE CGIS 
+
 ADHD_cgis <- getCGIS(ADHD_WITH_EXECFUNC)
 length(unique(ADHD_cgis$person_id))
+
 #########FIRST DIAGNOSIS OF ADHD#############
 diag_map <- getCategoryMap("diagnosis_map")
 icd_codes <- diag_map[(diag_map$name =="Attention-deficit hyperactivity disorders") , ]$diagnosis
 diag_date_ADHD<- getFirstDiagnosisDate(ADHD_WITH_EXECFUNC, unlist(icd_codes))
 length(unique(diag_date_ADHD$person_id))
+
 ########MERGE FIRST DIAGNOSIS AND CGIS##########
 ADHD_EXEC_cgis_diagnosis <- merge(ADHD_cgis,diag_date_ADHD, by = 'person_id')
 ADHD_EXEC_cgis_diag<-ADHD_EXEC_cgis_diagnosis%>%filter(as.Date(measurement_date)>=as.Date(first_diagnosis_date))%>%mutate(Baseline=as.numeric(as.Date(measurement_date)-as.Date(first_diagnosis_date)<=14))
 ADHD_EXEC_cgis_diag <- ADHD_EXEC_cgis_diag[ADHD_EXEC_cgis_diag$Baseline!=0, ]
 ADHD_EXEC_cgis_diag <- ADHD_EXEC_cgis_diag[ADHD_EXEC_cgis_diag$value!=0, ]
 length(unique(ADHD_EXEC_cgis_diag $person_id))
+
 #######GET MEDIAN BASELINE CGIS VALUE PER PATIENT#################
 ADHD_baseline_cgis_median_1 <- aggregate(ADHD_EXEC_cgis_diag$value, by = list(person_id = ADHD_EXEC_cgis_diag $person_id, diagnosis_date=ADHD_EXEC_cgis_diag $first_diagnosis_date), median)
 ADHD_baseline_cgis_median_1$x<- ceiling(ADHD_baseline_cgis_median_1$x)
 length(ADHD_baseline_cgis_median_1$person_id)
+
 ######SEPARATE CGIS 1 TO 7 VALUES INTO SEPARATE COLUMNS##############
 #ADHD_CGIS_SEPARATED_1=ADHD_baseline_cgis_median_1%>%mutate(CGIS_1=as.numeric(x==1))%>%mutate(CGIS_2=as.numeric(x==2))%>%mutate(CGIS_3=as.numeric(x==3))%>%mutate(CGIS_4=as.numeric(x==4))%>%mutate(CGIS_5=as.numeric(x==5))%>%mutate(CGIS_6=as.numeric(x==6))%>%mutate(CGIS_7=as.numeric(x==7))
 
@@ -91,30 +97,37 @@ length(DEMO_CGIS_1$person_id)
 ###########BASELINE CGIS 
 ADHD_cgis <- getCGIS(ADHD_NO_EXECFUNC)
 length(unique(ADHD_cgis$person_id))
+
 #########FIRST DIAGNOSIS OF ADHD#############
 diag_map <- getCategoryMap("diagnosis_map")
 icd_codes <- diag_map[(diag_map$name =="Attention-deficit hyperactivity disorders") , ]$diagnosis
 diag_date_ADHD<- getFirstDiagnosisDate(ADHD_NO_EXECFUNC, unlist(icd_codes))
 length(unique(diag_date_ADHD$person_id))
+
 ########MERGE FIRST DIAGNOSIS AND CGIS##########
 ADHD_NO_EXEC_cgis_diagnosis <- merge(ADHD_cgis,diag_date_ADHD, by = 'person_id')
 ADHD_NO_EXEC_cgis_diag<-ADHD_NO_EXEC_cgis_diagnosis%>%filter(as.Date(measurement_date)>=as.Date(first_diagnosis_date))%>%mutate(Baseline=as.numeric(as.Date(measurement_date)-as.Date(first_diagnosis_date)<=14))
 ADHD_NO_EXEC_cgis_diag <- ADHD_NO_EXEC_cgis_diag[ADHD_NO_EXEC_cgis_diag$Baseline!=0, ]
 ADHD_NO_EXEC_cgis_diag <- ADHD_NO_EXEC_cgis_diag[ADHD_NO_EXEC_cgis_diag$value!=0, ]
 length(unique(ADHD_NO_EXEC_cgis_diag $person_id))
+
 #######GET MEDIAN BASELINE CGIS VALUE PER PATIENT#################
 ADHD_baseline_cgis_median_2<- aggregate(ADHD_NO_EXEC_cgis_diag$value, by = list(person_id = ADHD_NO_EXEC_cgis_diag $person_id, diagnosis_date=ADHD_NO_EXEC_cgis_diag $first_diagnosis_date), median)
 ADHD_baseline_cgis_median_2$x<- ceiling(ADHD_baseline_cgis_median_2$x)
 length(ADHD_baseline_cgis_median_2$person_id)
+
 ######SEPARATE CGIS 1 TO 7 VALUES INTO SEPARATE COLUMNS##############
 #ADHD_CGIS_SEPARATED_2=ADHD_baseline_cgis_median_2%>%mutate(CGIS_1=as.numeric(x==1))%>%mutate(CGIS_2=as.numeric(x==2))%>%mutate(CGIS_3=as.numeric(x==3))%>%mutate(CGIS_4=as.numeric(x==4))%>%mutate(CGIS_5=as.numeric(x==5))%>%mutate(CGIS_6=as.numeric(x==6))%>%mutate(CGIS_7=as.numeric(x==7))
 #head(ADHD_CGIS_SEPARATED_2
      
 ADHD_CGIS_SEPARATED_2=ADHD_baseline_cgis_median_2%>%mutate(CGIS_1=as.character(x==1))%>%mutate(CGIS_2=as.character(x==2))%>%mutate(CGIS_3=as.character(x==3))%>%mutate(CGIS_4=as.character(x==4))%>%mutate(CGIS_5=as.character(x==5))%>%mutate(CGIS_6=as.character(x==6))%>%mutate(CGIS_7=as.character(x==7))
 head(ADHD_CGIS_SEPARATED_2)
+
 ####DEMOGRAPHICS COHORT 2##############
 all_demo <- getDemographics(ADHD_CGIS_SEPARATED_2$person_id)
-######JOIN AGE,OTHER DEMOGRAPHICS AND CGIS (SEPARATED VALUE 1 TO 7)
+
+######JOIN AGE,OTHER DEMOGRAPHICS AND CGIS (SEPARATED VALUE 1 TO 7)#####
+
 DEMO_CGIS_2= join_all(list(all_demo,ADHD_CGIS_SEPARATED_2),by='person_id',type='inner')%>%dplyr::group_by(x)%>%mutate( age = as.numeric(substring(diagnosis_date,1,4)) - birth_year) 
 length(DEMO_CGIS_2$person_id)
 
